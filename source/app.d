@@ -30,6 +30,13 @@ void main()
     router.post("/api/v1/volumes/:name/start", &startVolume);
     router.post("/api/v1/volumes/:name/stop", &stopVolume);
 
+    // UI Routing
+    router.get("/", staticTemplate!"index.dt");
+    router.get("/login", staticTemplate!"login.dt");
+    router.get("/peers", staticTemplate!"peers.dt");
+    router.get("/volumes", staticTemplate!"volumes.dt");
+    router.get("/dashboard", staticTemplate!"dashboard.dt");
+
 	auto listener = listenHTTP(settings, router);
 	scope (exit)
 	{
