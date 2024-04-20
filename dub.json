@@ -5,7 +5,11 @@
 	"copyright": "Copyright © 2024, Aravinda VK <mail@aravindavk.in>",
 	"dependencies": {
 		"vibe-d": "~>0.9",
-		"yxml": "~>0.1.3"
+		"yxml": "~>0.1.3",
+        "vibe-d:tls": "*"
+	},
+    "subConfigurations": {
+        "vibe-d:tls": "notls"
 	},
 	"description": "Glusterd Plus",
 	"license": "GPLv3",
