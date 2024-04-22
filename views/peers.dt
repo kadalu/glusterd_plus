@@ -1,0 +1,18 @@
+extends applayout
+block title
+  title List of Peers - Gluster FS Web Console
+
+block content
+  div.columns.is-multiline(x-data="data")
+    template(x-for="peer in peers")
+      div.column.is-4
+        div.card.m-2(:class="peer.state == 'Connected' ? 'has-background-success-light' : 'has-background-danger-light'")
+          div.card-content
+            div.media
+              div.media-left
+                figure.image.is-32x32(x-html="uuidToSvg(peer.id)")
+              div.media-content
+                p.title.is-4(x-text="peer.address")
+                p.subtitle.is-7.has-text-grey(x-text="peer.id")
+  
+  script(src="/js/peers.js")

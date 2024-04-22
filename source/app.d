@@ -43,10 +43,12 @@ int main(string[] args)
 
     auto settings = new HTTPServerSettings;
     settings.port = config.port;
+    settings.accessLogToConsole = true;
     settings.bindAddresses = ["::1", "127.0.0.1"];
     auto router = new URLRouter;
 
     router.any("/api/v1/*", &setJsonHeader);
+    router.get("*", serveStaticFiles("public/"));
 
     // peer routes
     router.post("/api/v1/peers", &addPeer);
