@@ -21,6 +21,17 @@ struct Volume
     DistributeGroup[] distributeGroups;
 }
 
+struct VolumeCreateOptions
+{
+    int replicaCount;
+    int arbiterCount;
+    int disperseCount;
+    int disperseRedundancyCount;
+    int disperseDataCount;
+    string transport;
+    bool force;
+}
+
 Volume[] parseVolumeInfo(string[] lines)
 {
     Volume[] volumes;
@@ -35,9 +46,35 @@ Volume[] parseVolumeStatus(string[] lines)
 
 mixin template volumesFunctions()
 {
-    void createVolume(string name, )
+    void createVolume(string name, string[] bricks, VolumeCreateOptions opts)
     {
+        import std.format;
 
+        auto cmd = ["volume", "create", name];
+        if (opts.replicaCount > 0)
+            cmd ~= ["replica", format!"%d"(opts.replicaCount)];
+
+        if (opts.arbiterCount > 0)
+            cmd ~= ["arbiter", format!"%d"(opts.arbiterCount)];
+
+        if (opts.disperseCount > 0)
+            cmd ~= ["disperse", format!"%d"(opts.disperseCount)];
+    
+        if (opts.disperseDataCount > 0)
+            cmd ~= ["disperse-data", format!"%d"(opts.disperseDataCount)];
+
+        if (opts.disperseRedundancyCount > 0)
+            cmd ~= ["redundancy", format!"%d"(opts.disperseRedundancyCount)];
+
+        if (opts.transport != "tcp" && opts.transport != "")
+            cmd ~= ["transport", opts.transport];
+
+        cmd ~= bricks;
+
+        if (opts.force)
+            cmd ~= ["force"];
+
+        executeGlusterCmd(cmd);
     }
 
     private void startStopVolume(string name, bool start = true, bool force = false)
