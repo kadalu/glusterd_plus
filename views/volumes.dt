@@ -1,0 +1,18 @@
+extends applayout
+block title
+  title List of Volumes - Gluster FS Web Console
+
+block content
+  div.columns.is-multiline(x-data="data")
+    template(x-for="volume in volumes")
+      div.column.is-4
+        div.card.m-2(:class="volume.state == 'Started' ? 'has-background-success-light' : 'has-background-danger-light'")
+          div.card-content
+            div.media
+              div.media-left
+                figure.image.is-32x32(x-html="uuidToSvg(volume.id)")
+              div.media-content
+                p.title.is-4(x-text="volume.name")
+                p.subtitle.is-7.has-text-grey(x-text="volume.id")
+  
+  script(src="/js/volumes.js")
