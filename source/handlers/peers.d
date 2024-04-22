@@ -7,7 +7,37 @@ import glusterd_plus.glustercli.helpers;
 
 void addPeer(HTTPServerRequest req, HTTPServerResponse res)
 {
+    if (req.contentType != "application/json") {
+        sendErrorJsonResponse(res, "Invalid Content-type header. Use \"application/json\"");
+        return;
+    }
 
+    string peerAddress;
+
+    // Validation
+    try {
+        peerAddress = req.json["address"].to!string;
+    } catch (JSONException) {
+        sendErrorJsonResponse(res, "Invalid JSON data");
+        return;
+    }
+
+    try {
+        _cli.addPeer(peerAddress);
+        res.statusCode = 201;
+
+        // TODO: Think about getting one peer info
+        // instead of fetching peers list
+        auto peers = _cli.listPeers();
+        import std.stdio;
+        writeln(peers);
+        foreach(peer; peers) {
+            if (peer.address == peerAddress)
+                res.writeJsonBody(peer);
+        }
+    } catch(GlusterCommandException err) {
+        sendErrorJsonResponse(res, err.msg, 500);
+    }
 }
 
 void listPeers(HTTPServerRequest req, HTTPServerResponse res)
@@ -24,8 +54,7 @@ void deletePeer(HTTPServerRequest req, HTTPServerResponse res)
         res.statusCode = 204;
         res.writeJsonBody(null);
     } catch(GlusterCommandException err) {
-        res.statusCode = 500;
-        res.writeJsonBody(["error": "Failed to delete the Peer", "message": err.msg]);
+        sendErrorJsonResponse(res, err.msg, 500);
     }
 }
 
