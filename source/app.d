@@ -1,10 +1,9 @@
 import std.process;
+import std.format;
 
 import vibe.vibe;
 
-import glusterd_plus.handlers.helpers;
-import glusterd_plus.handlers.peers;
-import glusterd_plus.handlers.volumes;
+import glusterd_plus.handlers;
 import glusterd_plus.glustercli;
 
 void setJsonHeader(HTTPServerRequest req, HTTPServerResponse res)
@@ -12,14 +11,34 @@ void setJsonHeader(HTTPServerRequest req, HTTPServerResponse res)
     res.contentType = "application/json; charset=utf-8";
 }
 
-void main()
+struct Config
 {
-    auto hostname = execute(["hostname", "-f"]);
-    auto cliSettings = GlusterCLISettings(localhostAddress: hostname.output.strip);
+    ushort port = 3000;
+    string glusterCommand = "/usr/sbin/gluster";
+    string localhostAddress;
+
+    string address()
+    {
+        if (localhostAddress == "") {
+            auto hostname = execute(["hostname", "-f"]);
+            return hostname.output.strip;
+        }
+
+        return localhostAddress;
+    }
+}
+
+int main(string[] args)
+{
+    auto config = Config();
+
+    // TODO: Handle above config as command args
+    auto cliSettings = GlusterCLISettings(glusterCommand: config.glusterCommand,
+                                          localhostAddress: config.address);
     glusterCliSetup(cliSettings);
 
 	auto settings = new HTTPServerSettings;
-	settings.port = 8080;
+	settings.port = config.port;
 	settings.bindAddresses = ["::1", "127.0.0.1"];
     auto router = new URLRouter;
 
@@ -51,6 +70,7 @@ void main()
 		listener.stopListening();
 	}
 
-	logInfo("Please open http://127.0.0.1:8080/ in your browser.");
+	logInfo(format("Please open http://127.0.0.1:%d in your browser.", config.port));
 	runApplication();
+    return 0;
 }
