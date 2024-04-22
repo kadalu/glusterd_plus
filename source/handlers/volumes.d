@@ -2,7 +2,8 @@ module glusterd_plus.handlers.volumes;
 
 import vibe.vibe;
 
-import glusterd_plus.glustercli;
+import glusterd_plus.handlers.helpers;
+import glusterd_plus.glustercli.helpers;
 
 void createVolume(HTTPServerRequest req, HTTPServerResponse res)
 {
@@ -11,7 +12,8 @@ void createVolume(HTTPServerRequest req, HTTPServerResponse res)
 
 void listVolumes(HTTPServerRequest req, HTTPServerResponse res)
 {
-
+    auto volumes = _cli.listVolumes;
+    res.writeJsonBody(volumes);
 }
 
 void deleteVolume(HTTPServerRequest req, HTTPServerResponse res)
