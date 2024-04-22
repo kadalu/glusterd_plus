@@ -2,7 +2,8 @@ module glusterd_plus.glustercli.helpers;
 
 class GlusterCommandException : Exception
 {
-    this(string msg, string file = __FILE__, size_t line = __LINE__) {
+    this(string msg, string file = __FILE__, size_t line = __LINE__)
+    {
         super(msg, file, line);
     }
 }
@@ -24,13 +25,15 @@ mixin template commandHelpers()
         string[] outlines;
         auto pipes = pipeProcess(cmd, Redirect.stdout | Redirect.stderr);
         auto returnCode = wait(pipes.pid);
-        foreach (line; pipes.stdout.byLine) outlines ~= line.idup;
+        foreach (line; pipes.stdout.byLine)
+            outlines ~= line.idup;
         if (returnCode != 0)
-            {
-                string[] errlines;
-                foreach (line; pipes.stderr.byLine) errlines ~= line.idup;
-                throw new GlusterCommandException(cmd.join(" ") ~ ": " ~ errlines.join("\n"));
-            }
+        {
+            string[] errlines;
+            foreach (line; pipes.stderr.byLine)
+                errlines ~= line.idup;
+            throw new GlusterCommandException(cmd.join(" ") ~ ": " ~ errlines.join("\n"));
+        }
 
         return outlines;
     }

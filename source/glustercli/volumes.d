@@ -59,7 +59,7 @@ mixin template volumesFunctions()
 
         if (opts.disperseCount > 0)
             cmd ~= ["disperse", format!"%d"(opts.disperseCount)];
-    
+
         if (opts.disperseDataCount > 0)
             cmd ~= ["disperse-data", format!"%d"(opts.disperseDataCount)];
 
@@ -89,12 +89,16 @@ mixin template volumesFunctions()
 
     void startVolume(string name, bool force = false)
     {
+        // dfmt off
         startStopVolume(name, start: true, force: force);
+        // dfmt on
     }
 
     void stopVolume(string name, bool force = false)
     {
+        // dfmt off
         startStopVolume(name, start: false, force: force);
+        // dfmt on
     }
 
     Volume[] listVolumes(bool status = false)

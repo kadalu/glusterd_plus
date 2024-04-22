@@ -40,9 +40,10 @@ Peer[] parsePeersFromPoolList(string[] lines, string localhostAddress)
 
     XmlElement peerslist = root.firstChildByTagName("peerStatus");
 
-    foreach(XmlElement e; peerslist.getChildrenByTagName("peer")) {
+    foreach (XmlElement e; peerslist.getChildrenByTagName("peer"))
+    {
         Peer peer;
-        
+
         peer.address = e.firstChildByTagName("hostname").textContent.dup;
 
         if (peer.address == "localhost")

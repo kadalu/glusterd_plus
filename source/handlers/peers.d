@@ -7,7 +7,8 @@ import glusterd_plus.glustercli.helpers;
 
 void addPeer(HTTPServerRequest req, HTTPServerResponse res)
 {
-    if (req.contentType != "application/json") {
+    if (req.contentType != "application/json")
+    {
         sendErrorJsonResponse(res, "Invalid Content-type header. Use \"application/json\"");
         return;
     }
@@ -15,14 +16,18 @@ void addPeer(HTTPServerRequest req, HTTPServerResponse res)
     string peerAddress;
 
     // Validation
-    try {
+    try
+    {
         peerAddress = req.json["address"].to!string;
-    } catch (JSONException) {
+    }
+    catch (JSONException)
+    {
         sendErrorJsonResponse(res, "Invalid JSON data");
         return;
     }
 
-    try {
+    try
+    {
         _cli.addPeer(peerAddress);
         res.statusCode = 201;
 
@@ -30,12 +35,16 @@ void addPeer(HTTPServerRequest req, HTTPServerResponse res)
         // instead of fetching peers list
         auto peers = _cli.listPeers();
         import std.stdio;
+
         writeln(peers);
-        foreach(peer; peers) {
+        foreach (peer; peers)
+        {
             if (peer.address == peerAddress)
                 res.writeJsonBody(peer);
         }
-    } catch(GlusterCommandException err) {
+    }
+    catch (GlusterCommandException err)
+    {
         sendErrorJsonResponse(res, err.msg, 500);
     }
 }
@@ -49,12 +58,14 @@ void listPeers(HTTPServerRequest req, HTTPServerResponse res)
 void deletePeer(HTTPServerRequest req, HTTPServerResponse res)
 {
     auto peerAddress = req.params.get("address");
-    try {
+    try
+    {
         _cli.deletePeer(peerAddress);
         res.statusCode = 204;
         res.writeJsonBody(null);
-    } catch(GlusterCommandException err) {
+    }
+    catch (GlusterCommandException err)
+    {
         sendErrorJsonResponse(res, err.msg, 500);
     }
 }
-

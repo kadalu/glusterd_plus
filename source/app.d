@@ -19,7 +19,8 @@ struct Config
 
     string address()
     {
-        if (localhostAddress == "") {
+        if (localhostAddress == "")
+        {
             auto hostname = execute(["hostname", "-f"]);
             return hostname.output.strip;
         }
@@ -33,13 +34,16 @@ int main(string[] args)
     auto config = Config();
 
     // TODO: Handle above config as command args
+    // dfmt off
     auto cliSettings = GlusterCLISettings(glusterCommand: config.glusterCommand,
                                           localhostAddress: config.address);
+    // dfmt on
+
     glusterCliSetup(cliSettings);
 
-	auto settings = new HTTPServerSettings;
-	settings.port = config.port;
-	settings.bindAddresses = ["::1", "127.0.0.1"];
+    auto settings = new HTTPServerSettings;
+    settings.port = config.port;
+    settings.bindAddresses = ["::1", "127.0.0.1"];
     auto router = new URLRouter;
 
     router.any("/api/v1/*", &setJsonHeader);
@@ -64,13 +68,13 @@ int main(string[] args)
     router.get("/volumes", staticTemplate!"volumes.dt");
     router.get("/dashboard", staticTemplate!"dashboard.dt");
 
-	auto listener = listenHTTP(settings, router);
-	scope (exit)
-	{
-		listener.stopListening();
-	}
+    auto listener = listenHTTP(settings, router);
+    scope (exit)
+    {
+        listener.stopListening();
+    }
 
-	logInfo(format("Please open http://127.0.0.1:%d in your browser.", config.port));
-	runApplication();
+    logInfo(format("Please open http://127.0.0.1:%d in your browser.", config.port));
+    runApplication();
     return 0;
 }
