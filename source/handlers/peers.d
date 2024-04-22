@@ -2,6 +2,8 @@ module glusterd_plus.handlers.peers;
 
 import vibe.vibe;
 
+import glusterd_plus.glustercli;
+
 void addPeer(HTTPServerRequest req, HTTPServerResponse res)
 {
 

@@ -2,6 +2,8 @@ module glusterd_plus.handlers.volumes;
 
 import vibe.vibe;
 
+import glusterd_plus.glustercli;
+
 void createVolume(HTTPServerRequest req, HTTPServerResponse res)
 {
 
