@@ -21,6 +21,18 @@ struct Volume
     DistributeGroup[] distributeGroups;
 }
 
+Volume[] parseVolumeInfo(string[] lines)
+{
+    Volume[] volumes;
+    return volumes;
+}
+
+Volume[] parseVolumeStatus(string[] lines)
+{
+    Volume[] volumes;
+    return volumes;
+}
+
 mixin template volumesFunctions()
 {
     void createVolume(string name, )
@@ -28,30 +40,45 @@ mixin template volumesFunctions()
 
     }
 
-    void startVolume(string name)
+    private void startStopVolume(string name, bool start = true, bool force = false)
     {
+        string action = start ? "start" : "stop";
+        auto cmd = ["volume", action, name];
+        if (force)
+            cmd ~= ["force"];
 
+        executeGlusterCmd(cmd);
     }
 
-    void stopVolume(string name)
+    void startVolume(string name, bool force = false)
     {
+        startStopVolume(name, start: true, force: force);
+    }
 
+    void stopVolume(string name, bool force = false)
+    {
+        startStopVolume(name, start: false, force: force);
     }
 
     Volume[] listVolumes(bool status = false)
     {
-        Volume[] volumes;
-        return volumes;
+        auto cmd = ["volume", "info"];
+
+        auto outlines = executeGlusterCmdXml(cmd);
+        return parseVolumeInfo(outlines);
     }
 
     Volume getVolume(string name, bool status = false)
     {
-        Volume volume;
-        return volume;
+        auto cmd = ["volume", "info", name];
+
+        auto outlines = executeGlusterCmdXml(cmd);
+        auto vols = parseVolumeInfo(outlines);
+        return vols[0];
     }
 
     void deleteVolume(string name)
     {
-
+        executeGlusterCmd(["volume", "delete", name]);
     }
 }

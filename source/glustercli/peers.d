@@ -7,21 +7,31 @@ struct Peer
     string state;
 }
 
+Peer[] parsePeersFromPoolList(string[] lines)
+{
+    Peer[] peers;
+    return peers;
+}
+
 mixin template peersFunctions()
 {
     void addPeer(string address)
     {
-        
+        auto cmd = ["peer", "probe", address];
+        executeGlusterCmd(cmd);
     }
 
     Peer[] listPeers()
     {
-        Peer[] peers;
-        return peers;
+        auto cmd = ["pool", "list"];
+        auto outlines = executeGlusterCmdXml(cmd);
+
+        return parsePeersFromPoolList(outlines);
     }
 
     void deletePeer(string address)
     {
-        
+        auto cmd = ["peer", "detach", address];
+        executeGlusterCmd(cmd);
     }
 }

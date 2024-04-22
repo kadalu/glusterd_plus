@@ -1,12 +1,12 @@
 module glusterd_plus.glustercli;
 
+import glusterd_plus.glustercli.helpers;
 import glusterd_plus.glustercli.peers;
 import glusterd_plus.glustercli.volumes;
 
 struct GlusterCLISettings
 {
-    string commandPath;
-    
+    string glusterCommand;
 }
 
 class GlusterCLI
@@ -18,6 +18,7 @@ class GlusterCLI
         this.settings = opts;
     }
 
+    mixin commandHelpers;
     mixin peersFunctions;
     mixin volumesFunctions;
 }
