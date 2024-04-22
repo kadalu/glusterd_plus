@@ -6,7 +6,8 @@ import glusterd_plus.glustercli.volumes;
 
 struct GlusterCLISettings
 {
-    string glusterCommand;
+    string glusterCommand = "/usr/sbin/gluster";
+    string localhostAddress;
 }
 
 class GlusterCLI

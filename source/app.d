@@ -1,7 +1,11 @@
+import std.process;
+
 import vibe.vibe;
 
+import glusterd_plus.handlers.helpers;
 import glusterd_plus.handlers.peers;
 import glusterd_plus.handlers.volumes;
+import glusterd_plus.glustercli;
 
 void setJsonHeader(HTTPServerRequest req, HTTPServerResponse res)
 {
@@ -10,6 +14,10 @@ void setJsonHeader(HTTPServerRequest req, HTTPServerResponse res)
 
 void main()
 {
+    auto hostname = execute(["hostname", "-f"]);
+    auto cliSettings = GlusterCLISettings(localhostAddress: hostname.output.strip);
+    glusterCliSetup(cliSettings);
+
 	auto settings = new HTTPServerSettings;
 	settings.port = 8080;
 	settings.bindAddresses = ["::1", "127.0.0.1"];
