@@ -1,5 +1,6 @@
 import std.process;
 import std.format;
+import std.getopt;
 
 import vibe.vibe;
 
@@ -32,6 +33,21 @@ struct Config
 int main(string[] args)
 {
     auto config = Config();
+
+    auto opts = getopt(
+        args,
+        std.getopt.config.passThrough,
+        "p|port", "Glusterd Plus Port", &config.port,
+        "g|gluster-command", "Gluster Command path", &config.glusterCommand,
+        "a|address", "Localhost Address", &config.localhostAddress
+    );
+
+    if (opts.helpWanted) {
+        defaultGetoptPrinter("glusterd-plus [OPTIONS]", opts.options);
+        // Vibe.d specific options
+        printCommandLineHelp();
+        return 1;
+    }
 
     // TODO: Handle above config as command args
     auto cliSettings = GlusterCLISettings();
@@ -76,6 +92,6 @@ int main(string[] args)
     }
 
     logInfo(format("Please open http://127.0.0.1:%d in your browser.", config.port));
-    runApplication();
+    runApplication(&args);
     return 0;
 }
