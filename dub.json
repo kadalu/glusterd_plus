@@ -13,5 +13,6 @@
 	},
 	"description": "Glusterd Plus",
 	"license": "GPLv3",
-	"name": "glusterd_plus"
+	"name": "glusterd_plus",
+    "targetName": "glusterdplus"
 }
