@@ -1,6 +1,6 @@
 module glusterd_plus.handlers.helpers;
 
-import vibe.vibe;
+import vibe.http.server;
 
 import glusterd_plus.glustercli;
 

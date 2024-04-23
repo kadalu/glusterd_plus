@@ -1,8 +1,14 @@
 import std.process;
 import std.format;
 import std.getopt;
+import std.string;
 
-import vibe.vibe;
+import vibe.core.core : runApplication;
+import vibe.core.args : printCommandLineHelp;
+import vibe.core.log : logInfo;
+import vibe.http.server;
+import vibe.http.router : URLRouter;
+import vibe.http.fileserver : serveStaticFiles;
 
 import glusterd_plus.handlers;
 import glusterd_plus.glustercli;

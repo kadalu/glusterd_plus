@@ -1,6 +1,8 @@
 module glusterd_plus.handlers.peers;
 
-import vibe.vibe;
+import std.json;
+
+import vibe.http.server;
 
 import glusterd_plus.handlers.helpers;
 import glusterd_plus.glustercli.helpers;
@@ -34,9 +36,7 @@ void addPeer(HTTPServerRequest req, HTTPServerResponse res)
         // TODO: Think about getting one peer info
         // instead of fetching peers list
         auto peers = _cli.listPeers();
-        import std.stdio;
 
-        writeln(peers);
         foreach (peer; peers)
         {
             if (peer.address == peerAddress)
