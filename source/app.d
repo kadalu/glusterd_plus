@@ -17,6 +17,7 @@ struct Config
     ushort port = 3000;
     string glusterCommand = "/usr/sbin/gluster";
     string localhostAddress;
+    string accessLogFile;
 
     string address()
     {
@@ -39,7 +40,8 @@ int main(string[] args)
         std.getopt.config.passThrough,
         "p|port", "Glusterd Plus Port", &config.port,
         "g|gluster-command", "Gluster Command path", &config.glusterCommand,
-        "a|address", "Localhost Address", &config.localhostAddress
+        "a|address", "Localhost Address", &config.localhostAddress,
+        "l|log-file", "Access log file path", &config.accessLogFile,
     );
 
     if (opts.helpWanted) {
@@ -58,7 +60,11 @@ int main(string[] args)
 
     auto settings = new HTTPServerSettings;
     settings.port = config.port;
-    settings.accessLogToConsole = true;
+    if (config.accessLogFile != "")
+        settings.accessLogFile = config.accessLogFile;
+    else
+        settings.accessLogToConsole = true;
+
     settings.bindAddresses = ["::1", "127.0.0.1"];
     auto router = new URLRouter;
 

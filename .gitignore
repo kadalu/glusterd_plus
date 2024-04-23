@@ -14,3 +14,4 @@ glusterd_plus-test-*
 *.o
 *.obj
 *.lst
+*.log
