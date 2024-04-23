@@ -34,10 +34,9 @@ int main(string[] args)
     auto config = Config();
 
     // TODO: Handle above config as command args
-    // dfmt off
-    auto cliSettings = GlusterCLISettings(glusterCommand: config.glusterCommand,
-                                          localhostAddress: config.address);
-    // dfmt on
+    auto cliSettings = GlusterCLISettings();
+    cliSettings.glusterCommand = config.glusterCommand;
+    cliSettings.localhostAddress = config.address;
 
     glusterCliSetup(cliSettings);
 

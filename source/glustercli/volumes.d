@@ -221,16 +221,12 @@ mixin template volumesFunctions()
 
     void startVolume(string name, bool force = false)
     {
-        // dfmt off
-        startStopVolume(name, start: true, force: force);
-        // dfmt on
+        startStopVolume(name, true, force);
     }
 
     void stopVolume(string name, bool force = false)
     {
-        // dfmt off
-        startStopVolume(name, start: false, force: force);
-        // dfmt on
+        startStopVolume(name, false, force);
     }
 
     Volume[] listVolumes(bool status = false)
