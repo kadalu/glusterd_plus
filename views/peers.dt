@@ -3,16 +3,29 @@ block title
   title List of Peers - Gluster FS Web Console
 
 block content
+  nav.breadcrumb(aria-label="breadcrumbs")
+    ul
+      li
+        a(href="/dashboard")
+          include home_icon
+      li.is-active
+        a(href="#", aria-current="page") Peers
   div.columns.is-multiline(x-data="data")
     template(x-for="peer in peers")
       div.column.is-4
-        div.card.m-2(:class="peer.state == 'Connected' ? 'has-background-success-light' : 'has-background-danger-light'")
+        div.card.m-2
           div.card-content
             div.media
               div.media-left
                 figure.image.is-32x32(x-html="uuidToSvg(peer.id)")
               div.media-content
-                p.title.is-4(x-text="peer.address")
-                p.subtitle.is-7.has-text-grey(x-text="peer.id")
+                p.title.is-6
+                  span.icon-text
+                    span(x-text="peer.address")
+                    span.has-text-success(x-show="peer.state == 'Connected'")
+                      include icon_arrow_up
+                    span.has-text-danger(x-show="peer.state != 'Connected'")
+                      include icon_arrow_down
+                p.subtitle.has-text-grey(x-text="peer.id", style="font-size: 11px")
   
   script(src="/js/peers.js")

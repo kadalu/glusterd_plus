@@ -7,10 +7,46 @@ html
     link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css")
     script(defer, src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.9/dist/cdn.min.js")
     script(src="/js/app.js")
-
+    style
+      | .menu-list a {background-color: transparent; color: inherit}
+      | .menu-label {color: inherit}
+      | .menu-list a.is-active {font-weight: bold;}
   body
-    block content
-    footer.footer
-      div.content.has-text-centered
-        p <strong>Gluster FS Web Console</strong> is designed, built, and backed by <a href="https://kadalu.tech">Kadalu Technologies</a>.
-        p Copyright &copy; 2024 Kadalu Technologies Private Limited. 
+    div.is-flex(x-data='{menuShow: true}')
+      div.is-flex-grow-0.is-flex-shrink-0.has-background-info-95(style="overflow-x: hidden;transition: all 200ms ease-in-out;", :style="{'flex-basis': menuShow ? '170px' : '0'}")
+        aside.menu.mb-4(:class="menuShow ? 'px-4' : 'px-6'", style="min-height: 75vh")
+          // a.navbar-item(href="/")
+          img(src="/images/logo.png", height="90", width="170", style="max-height: 100%")
+          p.menu-label.mt-4 Menu
+          ul.menu-list
+            li
+              a(href="/dashboard") Dashboard
+            li
+              a.is-active(href="/peers") Peers
+            li
+              a(href="/volumes") Volumes
+            li
+              a(href="/bricks") Bricks
+          p.menu-label.mt-4 User
+          ul.menu-list
+            li
+              a(href="/settings") Settings
+            li
+              a(href="/logout") Logout
+        div.py-2.px-2.has-background-info-85.has-text-dark(style="min-height:25vh")
+          div.content.has-text-centered
+            p <strong class="has-text-dark">Gluster FS Web Console</strong> is designed, built, and backed by <a class="has-text-dark" href="https://kadalu.tech">Kadalu Technologies</a>.
+      div.is-flex-grow-0.is-flex-shrink-0.has-background-c1-light.has-text-right(style="flex-basis: 20px; position:relative", @click="menuShow = !menuShow")
+        a.navbar-burger(role="button", aria-label="menu", aria-expanded="false", @click="showMenu = !showMenu", data-target="navbarBasicExample", style="display: flex")
+          span(aria-hidden="true")
+          span(aria-hidden="true")
+          span(aria-hidden="true")
+          span(aria-hidden="true")
+      div.is-flex-grow-1.is-flex-shrink-1(style="min-height:95vh")
+        a.navbar-item(x-show="!menuShow", href="/")
+          img(src="/images/logo.png", height="90", width="170", style="max-height: 100%")
+        div.py-2.pr-6
+          div.has-text-right
+            p.is-size-6 Last updated 5 minutes ago <a class="button has-background-info-35 has-text-white is-small">reload</a>
+          div.py-6
+            block content
