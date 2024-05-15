@@ -15,3 +15,8 @@ glusterdplus-test-*
 *.obj
 *.lst
 *.log
+*.tar.gz
+glusterdplus-*
+glusterdplus_*
+*.ddeb
+*.deb

@@ -1,0 +1,11 @@
+[Unit]
+Description=Enhanced Glusterd
+After=network.target
+Requires=glusterd.service
+
+[Service]
+PIDFile=/var/run/glusterdplus/glusterdplus.pid
+ExecStart=/usr/sbin/glusterdplus
+
+[Install]
+WantedBy=multi-user.target

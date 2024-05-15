@@ -75,7 +75,17 @@ int main(string[] args)
     auto router = new URLRouter;
 
     router.any("/api/v1/*", &setJsonHeader);
-    router.get("*", serveStaticFiles("public/"));
+
+    version(Release)
+    {
+        router.get("*", serveStaticFiles("/var/lib/glusterdplus/public/"));
+        pragma(msg, "Static files directory set to /var/lib/glusterdplus/public");
+    }
+    else
+    {
+        router.get("*", serveStaticFiles("public/"));
+        pragma(msg, "Static files directory set to ./public");
+    }
 
     // peer routes
     router.post("/api/v1/peers", &addPeer);

@@ -1,0 +1,15 @@
+Source: glusterdplus
+Section: main
+Priority: optional
+Maintainer: Kadalu Technologies Private Limited <packaging@kadalu.tech>
+Build-Depends: debhelper (>=11~)
+Standards-Version: 4.1.4
+Homepage: <https://github.com/kadalu/glusterd_plus>
+
+Package: glusterdplus
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Enhanced Glusterd - Gluster FS.
+             It adds the modern features to Glusterd like ReST APIs,
+             Web console and metrics exporters.
