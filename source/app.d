@@ -41,6 +41,7 @@ int main(string[] args)
 {
     auto config = Config();
 
+    // dfmt off
     auto opts = getopt(
         args,
         std.getopt.config.passThrough,
@@ -49,6 +50,7 @@ int main(string[] args)
         "a|address", "Localhost Address", &config.localhostAddress,
         "l|log-file", "Access log file path", &config.accessLogFile,
     );
+    // dfmt on
 
     if (opts.helpWanted) {
         defaultGetoptPrinter("glusterd-plus [OPTIONS]", opts.options);
@@ -107,11 +109,16 @@ int main(string[] args)
     router.get("/volumes", staticTemplate!"volumes.dt");
     router.get("/dashboard", staticTemplate!"dashboard.dt");
 
+    // Metrics Route
+    router.get("/metrics", &metricsHandler);
+
     auto listener = listenHTTP(settings, router);
     scope (exit)
     {
         listener.stopListening();
     }
+
+    metricsInitialize;
 
     logInfo(format("Please open http://127.0.0.1:%d in your browser.", config.port));
     runApplication(&args);
