@@ -52,7 +52,8 @@ int main(string[] args)
     );
     // dfmt on
 
-    if (opts.helpWanted) {
+    if (opts.helpWanted)
+    {
         defaultGetoptPrinter("glusterd-plus [OPTIONS]", opts.options);
         // Vibe.d specific options
         printCommandLineHelp();
@@ -78,7 +79,7 @@ int main(string[] args)
 
     router.any("/api/v1/*", &setJsonHeader);
 
-    version(Release)
+    version (Release)
     {
         router.get("*", serveStaticFiles("/var/lib/glusterdplus/public/"));
         pragma(msg, "Static files directory set to /var/lib/glusterdplus/public");
@@ -110,7 +111,8 @@ int main(string[] args)
     router.get("/dashboard", staticTemplate!"dashboard.dt");
 
     // Metrics Route
-    router.get("/metrics", &metricsHandler);
+    router.get("/metrics", &metricsPrometheusHandler);
+    router.get("/metrics.json", &metricsJsonHandler);
 
     auto listener = listenHTTP(settings, router);
     scope (exit)
