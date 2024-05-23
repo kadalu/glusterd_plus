@@ -10,6 +10,9 @@ class GlusterCommandException : Exception
 
 mixin template commandHelpers()
 {
+
+    import vibe.core.concurrency;
+
     private string[] executeGlusterCmd(string[] inputCmd, bool xml)
     {
 
@@ -40,11 +43,11 @@ mixin template commandHelpers()
 
     private string[] executeGlusterCmd(string[] inputCmd)
     {
-        return executeGlusterCmd(inputCmd, false);
+        return async(&executeGlusterCmd, inputCmd, false).getResult;
     }
 
     private string[] executeGlusterCmdXml(string[] inputCmd)
     {
-        return executeGlusterCmd(inputCmd, true);
+        return async(&executeGlusterCmd, inputCmd, true).getResult;
     }
 }
