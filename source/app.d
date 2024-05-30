@@ -13,6 +13,15 @@ import vibe.http.fileserver : serveStaticFiles;
 import glusterd_plus.handlers;
 import glusterd_plus.glustercli;
 
+const APP_HTTP_METHODS = [
+                          HTTPMethod.GET,
+                          HTTPMethod.HEAD,
+                          HTTPMethod.PUT,
+                          HTTPMethod.POST,
+                          HTTPMethod.DELETE,
+                          HTTPMethod.OPTIONS
+];
+
 void setJsonHeader(HTTPServerRequest req, HTTPServerResponse res)
 {
     res.contentType = "application/json; charset=utf-8";
@@ -24,6 +33,7 @@ struct Config
     string glusterCommand = "/usr/sbin/gluster";
     string localhostAddress;
     string accessLogFile;
+    bool showURLRoutes;
 
     string address()
     {
@@ -49,6 +59,7 @@ int main(string[] args)
         "g|gluster-command", "Gluster Command path", &config.glusterCommand,
         "a|address", "Localhost Address", &config.localhostAddress,
         "l|log-file", "Access log file path", &config.accessLogFile,
+        "routes", "Show all URL Routes", &config.showURLRoutes,
     );
     // dfmt on
 
@@ -114,6 +125,22 @@ int main(string[] args)
     router.get("/metrics", &metricsPrometheusHandler);
     router.get("/metrics.json", &metricsJsonHandler);
 
+    if (config.showURLRoutes)
+    {
+        import std.stdio;
+
+        writefln("%10s  %s", "Verb", "URI Pattern");
+
+        import std.algorithm.searching;
+
+        foreach(route; router.getAllRoutes())
+        {
+            if (APP_HTTP_METHODS.canFind(route.method))
+                writefln("%10s  %s", route.method, route.pattern);
+        }
+        return 0;
+    }
+
     auto listener = listenHTTP(settings, router);
     scope (exit)
     {
@@ -123,6 +150,7 @@ int main(string[] args)
     metricsInitialize;
 
     logInfo(format("Please open http://127.0.0.1:%d in your browser.", config.port));
+
     runApplication(&args);
     return 0;
 }
