@@ -10,11 +10,38 @@ block content
           include home_icon
       li.is-active
         a(href="#", aria-current="page") Peers
-  div.columns.is-multiline(x-data="data")
+  article.notification.has-background-info-95(x-show="showAddPeer", x-transition)
+    button.delete(aria-label="delete", @click="showAddPeer = false")
+    p.is-size-5 Add Peer
+    p Glusterd should be running in the server<span x-text="peerAddress == '' ? '' : `(${peerAddress})`"></span> and it should not be part of any Cluster.
+    div.field.mt-4
+      label.label Address (Hostname/IP)
+      div.control
+        input.input(type="text", placeholder="Address", x-model="peerAddress")
+    div.control
+      button.button.is-info(@click="addPeer") Add
+  div
+    p.is-size-5.mx-2
+      span List of Peers
+      button.button.mx-2.is-link.is-small(x-show="!showAddPeer", @click="showAddPeer = true")
+        span.icon-text
+          span Add
+          include icon_plus
+ 
+  div.columns.is-multiline
     template(x-for="peer in peers")
       div.column.is-4
         div.card.m-2
           div.card-content
+            div.has-text-right(style="margin-top: -10px")
+              div.dropdown.is-right(x-data="{dropdownOpened: false}", :class="dropdownOpened ? 'is-active' : ''")
+                div.dropdown-trigger
+                  button.button.is-white(aria-haspopup="true", aria-controls="dropdown-menu3", @click="dropdownOpened = !dropdownOpened", @click.away="dropdownOpened = false")
+                    include icon_ellipsis-horizontal
+                div.dropdown-menu(role="menu")
+                  div.dropdown-content
+                    a.dropdown-item(@click="removePeer(peer.address)") <strong>Remove</strong> peer from the cluster.
+
             div.media
               div.media-left
                 figure.image.is-32x32(x-html="uuidToSvg(peer.id)")

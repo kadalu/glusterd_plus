@@ -48,5 +48,5 @@ html
         div.py-2.pr-6
           div.has-text-right
             p.is-size-6 Last updated 5 minutes ago <a class="button has-background-info-35 has-text-white is-small">reload</a>
-          div.py-6
+          div.py-6(x-data="data")
             block content
