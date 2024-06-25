@@ -1,26 +1,32 @@
-module glusterd_plus.handlers.peers;
+module handlers.peers;
 
-import std.json;
+import serverino;
+import vibe.data.json;
 
-import vibe.http.server;
+import handlers.helpers;
+import glustercli.helpers;
 
-import glusterd_plus.handlers.helpers;
-import glusterd_plus.glustercli.helpers;
-
-void addPeer(HTTPServerRequest req, HTTPServerResponse res)
+struct PeerRequest
 {
-    if (req.contentType != "application/json")
+    string address;
+}
+
+@endpoint @route!((r) => r.pathMatch("Post", "/api/v1/peers"))
+void addPeer(Request req, Output res)
+{
+    if (req.body.contentType != "application/json")
     {
         sendErrorJsonResponse(res, "Invalid Content-type header. Use \"application/json\"");
         return;
     }
 
     string peerAddress;
+    PeerRequest data;
 
     // Validation
     try
     {
-        peerAddress = req.json["address"].to!string;
+        data = deserializeJson!PeerRequest(req.body.data);
     }
     catch (JSONException)
     {
@@ -30,8 +36,8 @@ void addPeer(HTTPServerRequest req, HTTPServerResponse res)
 
     try
     {
-        _cli.addPeer(peerAddress);
-        res.statusCode = 201;
+        _cli.addPeer(data.address);
+        res.status = 201;
 
         // TODO: Think about getting one peer info
         // instead of fetching peers list
@@ -39,7 +45,7 @@ void addPeer(HTTPServerRequest req, HTTPServerResponse res)
 
         foreach (peer; peers)
         {
-            if (peer.address == peerAddress)
+            if (peer.address == data.address)
                 res.writeJsonBody(peer);
         }
     }
@@ -49,20 +55,21 @@ void addPeer(HTTPServerRequest req, HTTPServerResponse res)
     }
 }
 
-void listPeers(HTTPServerRequest req, HTTPServerResponse res)
+@endpoint @route!((r) => r.pathMatch("Get", "/api/v1/peers"))
+void listPeers(Request req, Output res)
 {
     auto peers = _cli.listPeers;
     res.writeJsonBody(peers);
 }
 
-void deletePeer(HTTPServerRequest req, HTTPServerResponse res)
+@endpoint @route!((r) => r.pathMatch("Delete", "/api/v1/peers/:address"))
+void deletePeer(Request req, Output res)
 {
-    auto peerAddress = req.params.get("address");
+    auto params = req.pathParams("/api/v1/peers/:address");
     try
     {
-        _cli.deletePeer(peerAddress);
-        res.statusCode = 204;
-        res.writeJsonBody(null);
+        _cli.deletePeer(params["address"]);
+        res.status = 204;
     }
     catch (GlusterCommandException err)
     {

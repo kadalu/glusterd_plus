@@ -1,4 +1,4 @@
-module glusterd_plus.glustercli.helpers;
+module glustercli.helpers;
 
 class GlusterCommandException : Exception
 {

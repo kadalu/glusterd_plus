@@ -13,6 +13,7 @@
 		"openssl": "3.3.3",
 		"openssl-static": "1.0.5+3.0.8",
 		"prometheus": "0.2.1",
+		"serverino": "0.7.9",
 		"silly": "1.1.1",
 		"stdx-allocator": "2.77.5",
 		"taggedalgebraic": "0.11.23",

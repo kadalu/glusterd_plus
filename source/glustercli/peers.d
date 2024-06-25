@@ -1,4 +1,4 @@
-module glusterd_plus.glustercli.peers;
+module glustercli.peers;
 
 import std.array;
 

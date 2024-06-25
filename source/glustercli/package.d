@@ -1,8 +1,8 @@
-module glusterd_plus.glustercli;
+module glustercli;
 
-import glusterd_plus.glustercli.helpers;
-import glusterd_plus.glustercli.peers;
-import glusterd_plus.glustercli.volumes;
+import glustercli.helpers;
+import glustercli.peers;
+import glustercli.volumes;
 
 struct GlusterCLISettings
 {

@@ -1,11 +1,11 @@
-module glusterd_plus.glustercli.volumes;
+module glustercli.volumes;
 
 import std.array;
 import std.conv;
 
 import yxml;
 
-import glusterd_plus.glustercli.peers;
+import glustercli.peers;
 
 struct Brick
 {

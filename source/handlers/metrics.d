@@ -1,11 +1,11 @@
-module glusterd_plus.handlers.metrics;
+module handlers.metrics;
 
-import vibe.http.server;
+import serverino;
 import vibe.data.json : ignore;
 import prometheus.gauge;
 import prometheus.registry;
 
-import glusterd_plus.handlers.helpers;
+import handlers.helpers;
 
 struct MetricSample
 {
@@ -104,14 +104,16 @@ void metricsOfPeers()
     }
 }
 
-void metricsJsonHandler(HTTPServerRequest req, HTTPServerResponse res)
+@endpoint @route!((r) => r.pathMatch("Get", "/metrics.json"))
+void metricsJsonHandler(Request req, Output res)
 {
     collectMetrics;
 
     res.writeJsonBody(_metrics);
 }
 
-void metricsPrometheusHandler(HTTPServerRequest req, HTTPServerResponse res)
+@endpoint @route!((r) => r.pathMatch("Get", "/metrics"))
+void metricsPrometheusHandler(Request req, Output res)
 {
     collectMetrics;
 
@@ -124,5 +126,6 @@ void metricsPrometheusHandler(HTTPServerRequest req, HTTPServerResponse res)
         data ~= "\n";
     }
 
-    res.writeBody(data, "text/plain");
+    res.addHeader("Content-Type", "text/plain");
+    res.write(data);
 }
