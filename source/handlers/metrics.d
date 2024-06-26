@@ -1,6 +1,6 @@
 module handlers.metrics;
 
-import serverino;
+import handy_httpd;
 import vibe.data.json : ignore;
 import prometheus.gauge;
 import prometheus.registry;
@@ -59,7 +59,7 @@ class Metric
     }
 }
 
-Metric[string] _metrics;
+__gshared Metric[string] _metrics;
 
 void metricsInitialize()
 {
@@ -104,16 +104,14 @@ void metricsOfPeers()
     }
 }
 
-@endpoint @route!((r) => r.pathMatch("Get", "/metrics.json"))
-void metricsJsonHandler(Request req, Output res)
+void metricsJsonHandler(ref HttpRequestContext ctx)
 {
     collectMetrics;
 
-    res.writeJsonBody(_metrics);
+    ctx.response.writeJsonBody(_metrics);
 }
 
-@endpoint @route!((r) => r.pathMatch("Get", "/metrics"))
-void metricsPrometheusHandler(Request req, Output res)
+void metricsPrometheusHandler(ref HttpRequestContext ctx)
 {
     collectMetrics;
 
@@ -126,6 +124,5 @@ void metricsPrometheusHandler(Request req, Output res)
         data ~= "\n";
     }
 
-    res.addHeader("Content-Type", "text/plain");
-    res.write(data);
+    ctx.response.writeBodyBytes(data, "text/plain");
 }

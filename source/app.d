@@ -2,13 +2,12 @@ import std.process;
 import std.format;
 import std.getopt;
 import std.string;
-import core.runtime;
-import core.stdc.stdlib : exit;
 import std.algorithm.searching;
-import std.logger;
 
-import serverino;
+import handy_httpd;
+import handy_httpd.handlers;
 import vibe.data.json;
+import slf4d;
 
 import handlers;
 import handlers.peers;
@@ -36,25 +35,11 @@ struct Config
 
 Config config;
 
-@onWorkerStart void workerStart()
+int main(string[] args)
 {
-    auto cliSettings = deserializeJson!GlusterCLISettings(environment["clisettings"]);
-    glusterCliSetup(cliSettings);
-}
-
-@onServerInit ServerinoConfig configure()
-{
-    ServerinoConfig sc = ServerinoConfig.create();
-    sc.addListener("0.0.0.0", config.port);
-    sc.setWorkerUser("root");
-    sc.setWorkerGroup("root");
-
-    return sc;
-}
-
-@onDaemonStart void setup()
-{
-    auto args = Runtime.args;
+    import etc.linux.memoryerror;
+    static if (is(typeof(registerMemoryErrorHandler)))
+        registerMemoryErrorHandler();
 
     // dfmt off
     auto opts = getopt(
@@ -71,19 +56,56 @@ Config config;
     if (opts.helpWanted)
     {
         defaultGetoptPrinter("glusterd-plus [OPTIONS]", opts.options);
-        exit(0);
+        return 0;
     }
 
     // TODO: Handle above config as command args
     auto cliSettings = GlusterCLISettings();
     cliSettings.glusterCommand = config.glusterCommand;
     cliSettings.localhostAddress = config.address;
-    environment["clisettings"] = serializeToJsonString(cliSettings);
-    environment["config"] = serializeToJsonString(config);
 
+    glusterCliSetup(cliSettings);
     metricsInitialize;
-    auto logger = new FileLogger("app.log");
-    logger.info("Static files directory is set to " ~ STATIC_FILES_DIR);
+
+    infoF!"Static files directory={%s}"(STATIC_FILES_DIR);
+
+    auto fileHandler = new FileResolvingHandler(STATIC_FILES_DIR);
+
+    auto router = new PathHandler;
+    router
+        .addMapping(Method.POST, "/api/v1/peers", &addPeerHandler)
+        .addMapping(Method.GET, "/api/v1/peers", &listPeersHandler)
+        .addMapping(Method.DELETE, "/api/v1/peers/:address", &deletePeerHandler)
+        .addMapping(Method.GET, "/metrics", &metricsPrometheusHandler)
+        .addMapping(Method.GET, "/metrics.json", &metricsJsonHandler)
+
+        .addMapping(Method.POST, "/api/v1/volumes", &createVolumeHandler)
+        .addMapping(Method.GET, "/api/v1/volumes", &listVolumesHandler)
+        .addMapping(Method.DELETE, "/api/v1/volumes/:name", &deleteVolumeHandler)
+        .addMapping(Method.GET, "/api/v1/volumes/:name", &getVolumeHandler)
+        .addMapping(Method.POST, "/api/v1/volumes/:name/start", &startVolumeHandler)
+        .addMapping(Method.POST, "/api/v1/volumes/:name/stop", &stopVolumeHandler)
+
+        .addMapping(Method.GET, "/", &homeHandler)
+        .addMapping(Method.GET, "/dashboard", &dashboardHandler)
+        .addMapping(Method.GET, "/login", &loginHandler)
+        .addMapping(Method.GET, "/volumes", &volumesHandler)
+        .addMapping(Method.GET, "/peers", &peersHandler)
+        
+        .addMapping(Method.GET, "/images/*", fileHandler)
+        .addMapping(Method.GET, "/js/*", fileHandler);
+
+    auto mainHandler = new FilteredRequestHandler(
+        router,
+        [new AuthFilter]
+    );
+
+    ServerConfig cfg;
+    cfg.port = config.port;
+
+    auto server = new HttpServer(mainHandler, cfg);
+    server.start();
+
+    return 0;
 }
 
-mixin ServerinoMain!(handlers.peers, handlers.volumes, handlers.metrics, handlers.ui);

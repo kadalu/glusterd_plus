@@ -1,6 +1,6 @@
 module handlers.peers;
 
-import serverino;
+import handy_httpd;
 import vibe.data.json;
 
 import handlers.helpers;
@@ -11,14 +11,9 @@ struct PeerRequest
     string address;
 }
 
-@endpoint @route!((r) => r.pathMatch("Post", "/api/v1/peers"))
-void addPeer(Request req, Output res)
+void addPeerHandler(ref HttpRequestContext ctx)
 {
-    if (req.body.contentType != "application/json")
-    {
-        sendErrorJsonResponse(res, "Invalid Content-type header. Use \"application/json\"");
-        return;
-    }
+    enforceHttpJson(ctx.request.isJsonContentType, HttpStatus.BAD_REQUEST, "Invalid Content-type header. Use \"application/json\"");
 
     string peerAddress;
     PeerRequest data;
@@ -26,18 +21,18 @@ void addPeer(Request req, Output res)
     // Validation
     try
     {
-        data = deserializeJson!PeerRequest(req.body.data);
+        data = deserializeJson!PeerRequest(ctx.request.readBodyAsString);
     }
     catch (JSONException)
     {
-        sendErrorJsonResponse(res, "Invalid JSON data");
+        ctx.sendErrorJsonResponse("Invalid JSON data");
         return;
     }
 
     try
     {
         _cli.addPeer(data.address);
-        res.status = 201;
+        ctx.response.setStatus(HttpStatus.CREATED);
 
         // TODO: Think about getting one peer info
         // instead of fetching peers list
@@ -46,33 +41,31 @@ void addPeer(Request req, Output res)
         foreach (peer; peers)
         {
             if (peer.address == data.address)
-                res.writeJsonBody(peer);
+                ctx.response.writeJsonBody(peer);
         }
     }
     catch (GlusterCommandException err)
     {
-        sendErrorJsonResponse(res, err.msg, 500);
+        ctx.sendErrorJsonResponse(err.msg, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
 
-@endpoint @route!((r) => r.pathMatch("Get", "/api/v1/peers"))
-void listPeers(Request req, Output res)
+void listPeersHandler(ref HttpRequestContext ctx)
 {
     auto peers = _cli.listPeers;
-    res.writeJsonBody(peers);
+    ctx.response.writeJsonBody(peers);
 }
 
-@endpoint @route!((r) => r.pathMatch("Delete", "/api/v1/peers/:address"))
-void deletePeer(Request req, Output res)
+void deletePeerHandler(ref HttpRequestContext ctx)
 {
-    auto params = req.pathParams("/api/v1/peers/:address");
+    auto peerAddress = ctx.request.pathParams["address"];
     try
     {
-        _cli.deletePeer(params["address"]);
-        res.status = 204;
+        _cli.deletePeer(peerAddress);
+        ctx.response.setStatus(HttpStatus.NO_CONTENT);
     }
     catch (GlusterCommandException err)
     {
-        sendErrorJsonResponse(res, err.msg, 500);
+        ctx.sendErrorJsonResponse(err.msg, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

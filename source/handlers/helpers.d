@@ -3,87 +3,61 @@ module handlers.helpers;
 import std.stdio;
 import std.array : appender;
 import std.string;
-import std.typecons;
 import std.conv;
 
-import serverino;
+import handy_httpd;
 import diet.html;
 import vibe.data.json;
 
 import glustercli;
 
-GlusterCLI _cli;
+__gshared GlusterCLI _cli;
 
 void glusterCliSetup(GlusterCLISettings settings)
 {
+    import std.stdio;
+    writeln("initialized");
     _cli = new GlusterCLI(settings);
 }
 
-void sendErrorJsonResponse(Output res, string error, ushort code = 400)
+void writeJsonBody(T)(HttpResponse res, T data)
 {
-    res.status = code;
-    res.writeJsonBody(["error": error]);
+    res.writeBodyString(serializeToJsonString(data), "application/json");
 }
 
-Nullable!(string[string]) matchedPathParams(string pattern, string path)
-{
-    string[string] params;
-
-    // If the pattern and path are matching then
-    // no need check part by part.
-    if (pattern == path)
-        return params.nullable;
-
-    // Split the pattern and path into parts
-    auto patternParts = pattern.strip("/").split("/");
-    auto pathParts = path.strip("/").split("/");
-
-    // Pattern group should match the given path parts
-    if (patternParts.length != pathParts.length)
-        return Nullable!(string[string]).init;
-
-    // For each pattern parts, if it starts with `:`
-    // then collect it as path param else path part should
-    // match the respective part of the pattern.
-    foreach(idx, p; patternParts)
-    {
-        if (p[0] == ':')
-            params[p[1..$]] = pathParts[idx];
-        else if(p != pathParts[idx])
-            return Nullable!(string[string]).init;
-    }
-
-    return params.nullable;
-}
-
-void writeJsonBody(T)(Output res, T data)
-{
-    res.addHeader("Content-Type", "application/json");
-    res.write(serializeToJsonString(data));
-}
-
-bool pathMatch(const(Request) req, string method, string pattern)
-{
-    return (
-        req.method == method.capitalize.to!(Request.Method) &&
-        !matchedPathParams(pattern, req.path).isNull
-    );
-}
-
-string[string] pathParams(Request req, string pattern)
-{
-    string[string] params;
-    auto data = matchedPathParams(pattern, req.path);
-    if (!data.isNull)
-        params = data.get;
-
-    return params;
-}
-
-void renderDiet(Args...)(ref Output res)
+void render(Args...)(ref HttpResponse res)
 {
     auto text = appender!string;
     text.compileHTMLDietFile!(Args);
-    res.addHeader("Content-Type", "text/html");
-    res.write(text.data);
+    res.writeBodyString(text.data, "text/html");
+}
+
+void enforceHttp(bool cond, HttpStatus status, string message)
+{
+    if (!cond)
+        throw new HttpStatusException(status, message);
+}
+
+void enforceHttpJson(bool cond, HttpStatus status, string message)
+{
+    enforceHttp(cond, status, serializeToJsonString(["error": message]));
+}
+
+string contentType(HttpRequest req)
+{
+    if (req.headers.contains("Content-Type"))
+        return req.headers["Content-Type"];
+
+    return "";
+}
+
+bool isJsonContentType(HttpRequest req)
+{
+    return req.contentType.startsWith("application/json");
+}
+
+void sendErrorJsonResponse(ref HttpRequestContext ctx, string error, HttpStatus status = HttpStatus.BAD_REQUEST)
+{
+    ctx.response.setStatus(status);
+    ctx.response.writeJsonBody(["error": error]);
 }

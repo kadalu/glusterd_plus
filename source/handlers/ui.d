@@ -2,7 +2,7 @@ module handlers.ui;
 
 import std.algorithm;
 
-import serverino;
+import handy_httpd;
 
 import handlers.helpers;
 
@@ -11,41 +11,27 @@ version (Release)
 else
     const STATIC_FILES_DIR = "public";
 
-@endpoint @route!((r) => r.pathMatch("Get", "/"))
-void home(Request req, Output res)
+void homeHandler(ref HttpRequestContext ctx)
 {
-    res.renderDiet!"index.dt";
+    ctx.response.render!"index.dt";
 }
 
-@endpoint @route!((r) => r.pathMatch("Get", "/dashboard"))
-void dashboard(Request req, Output res)
+void dashboardHandler(ref HttpRequestContext ctx)
 {
-    res.renderDiet!"dashboard.dt";
+    ctx.response.render!"dashboard.dt";
 }
 
-@endpoint @route!((r) => r.pathMatch("Get", "/login"))
-void login(Request req, Output res)
+void loginHandler(ref HttpRequestContext ctx)
 {
-    res.renderDiet!"login.dt";
+    ctx.response.render!"login.dt";
 }
 
-@endpoint @route!((r) => r.pathMatch("Get", "/peers"))
-void peers(Request req, Output res)
+void peersHandler(ref HttpRequestContext ctx)
 {
-    res.renderDiet!"peers.dt";
+    ctx.response.render!"peers.dt";
 }
 
-@endpoint @route!((r) => r.pathMatch("Get", "/volumes"))
-void volumes(Request req, Output res)
+void volumesHandler(ref HttpRequestContext ctx)
 {
-    res.renderDiet!"volumes.dt";
-}
-
-@endpoint
-@route!((r) => r.path.startsWith("/images/"))
-@route!((r) => r.path.startsWith("/js/"))
-void staticFiles(Request req, Output res)
-{
-    // TODO: Check if any validations needed for the req.path
-    res.serveFile(STATIC_FILES_DIR ~ req.path);
+    ctx.response.render!"volumes.dt";
 }
