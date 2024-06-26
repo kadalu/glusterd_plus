@@ -1,8 +1,11 @@
 module glustercli;
 
-import glustercli.helpers;
-import glustercli.peers;
-import glustercli.volumes;
+public
+{
+    import glustercli.helpers;
+    import glustercli.peers;
+    import glustercli.volumes;
+}
 
 struct GlusterCLISettings
 {

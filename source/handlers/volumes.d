@@ -18,7 +18,8 @@ void listVolumesHandler(ref HttpRequestContext ctx)
 
 void deleteVolumeHandler(ref HttpRequestContext ctx)
 {
-
+    auto name = ctx.request.pathParams["name"];
+    _cli.deleteVolume(name);
 }
 
 void getVolumeHandler(ref HttpRequestContext ctx)
@@ -28,10 +29,12 @@ void getVolumeHandler(ref HttpRequestContext ctx)
 
 void startVolumeHandler(ref HttpRequestContext ctx)
 {
-
+    auto name = ctx.request.pathParams["name"];
+    _cli.startVolume(name, ctx.request.boolQueryParam("force"));
 }
 
 void stopVolumeHandler(ref HttpRequestContext ctx)
 {
-
+    auto name = ctx.request.pathParams["name"];
+    _cli.stopVolume(name);
 }

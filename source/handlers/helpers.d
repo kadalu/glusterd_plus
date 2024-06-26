@@ -8,6 +8,7 @@ import std.conv;
 import handy_httpd;
 import diet.html;
 import vibe.data.json;
+import slf4d;
 
 import glustercli;
 
@@ -16,7 +17,6 @@ __gshared GlusterCLI _cli;
 void glusterCliSetup(GlusterCLISettings settings)
 {
     import std.stdio;
-    writeln("initialized");
     _cli = new GlusterCLI(settings);
 }
 
@@ -60,4 +60,46 @@ void sendErrorJsonResponse(ref HttpRequestContext ctx, string error, HttpStatus 
 {
     ctx.response.setStatus(status);
     ctx.response.writeJsonBody(["error": error]);
+}
+
+bool boolQueryParam(HttpRequest req, string key, bool defaultValue = false)
+{
+    if (req.queryParams.contains(key))
+    {
+        auto flag = req.queryParams[key];
+        return flag == "true" ? true : false;
+    }
+
+    return defaultValue;
+}
+
+class AppExceptionHandler : BasicServerExceptionHandler
+{
+    override void handle(ref HttpRequestContext ctx, Exception e)
+    {
+        if (ctx.response.isFlushed)
+        {
+            error("Response is already flushed; cannot handle exception.", e);
+            return;
+        }
+        if (auto statusExc = cast(HttpStatusException) e)
+        {
+            handleHttpStatusException(ctx, statusExc);
+        }
+        else if (auto cliExc = cast(GlusterCommandException) e)
+        {
+            handleCliException(ctx, cliExc);
+        }
+        else
+        {
+            handleOtherException(ctx, e);
+        }
+    }
+
+    protected void handleCliException(ref HttpRequestContext ctx, GlusterCommandException e)
+    {
+        debugF!"Handling GlusterCommandException: %s"(e.message);
+        string message = e.message !is null ? "Failed to run the command" : e.message.to!string; 
+        ctx.sendErrorJsonResponse(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

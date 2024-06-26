@@ -104,6 +104,7 @@ int main(string[] args)
     cfg.port = config.port;
 
     auto server = new HttpServer(mainHandler, cfg);
+    server.setExceptionHandler(new AppExceptionHandler);
     server.start();
 
     return 0;
