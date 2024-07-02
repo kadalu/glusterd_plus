@@ -14,6 +14,21 @@ import glustercli;
 
 __gshared GlusterCLI _cli;
 
+auto deserialize(T)(HttpRequest req)
+{
+    try
+        return deserializeJson!T(req.readBodyAsString);
+    catch (JSONException)
+        enforceHttpJson(false, HttpStatus.BAD_REQUEST, "Invalid JSON data");
+
+    return T.init;
+}
+
+void validateRequestContentTypeJson(HttpRequest req)
+{
+    enforceHttpJson(req.isJsonContentType, HttpStatus.BAD_REQUEST, "Invalid Content-type header. Use \"application/json\"");
+}
+
 void glusterCliSetup(GlusterCLISettings settings)
 {
     import std.stdio;

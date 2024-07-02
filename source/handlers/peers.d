@@ -1,7 +1,6 @@
 module handlers.peers;
 
 import handy_httpd;
-import vibe.data.json;
 
 import handlers.helpers;
 import glustercli.helpers;
@@ -13,21 +12,9 @@ struct PeerRequest
 
 void addPeerHandler(ref HttpRequestContext ctx)
 {
-    enforceHttpJson(ctx.request.isJsonContentType, HttpStatus.BAD_REQUEST, "Invalid Content-type header. Use \"application/json\"");
+    ctx.request.validateRequestContentTypeJson;
 
-    string peerAddress;
-    PeerRequest data;
-
-    // Validation
-    try
-    {
-        data = deserializeJson!PeerRequest(ctx.request.readBodyAsString);
-    }
-    catch (JSONException)
-    {
-        ctx.sendErrorJsonResponse("Invalid JSON data");
-        return;
-    }
+    auto data = ctx.request.deserialize!PeerRequest;
 
     _cli.addPeer(data.address);
     ctx.response.setStatus(HttpStatus.CREATED);
