@@ -5,6 +5,15 @@ import handy_httpd;
 import handlers.helpers;
 import glustercli.helpers;
 
+struct VolumeRequest
+{
+    string name;
+    string[] bricks;
+    int replicaCount;
+    bool start;
+    bool addPeers;
+}
+
 void createVolumeHandler(ref HttpRequestContext ctx)
 {
 
